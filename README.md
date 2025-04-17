@@ -77,7 +77,7 @@ CS50 Shop is a full-featured e-commerce web application built as a final project
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/cs50_shop.git
+   git clone https://github.com/ayubabdiaziz/cs50_shop.git
    cd cs50_shop
    ```
 
