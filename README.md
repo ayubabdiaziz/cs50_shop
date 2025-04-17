@@ -1,6 +1,6 @@
 # CS50 Shop - E-commerce Application
 
-![CS50 Shop](https://cs50.harvard.edu/x/2023/project/cs50.png)
+## Video Demo: <https://youtu.be/1nMfr8fXCtg>
 
 ## Overview
 
