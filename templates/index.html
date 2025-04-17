@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Welcome to CS50 Shop
+{% endblock %}
+
+{% block main %}
+    <!-- Hero Section -->
+    <section class="hero bg-light text-center rounded-3 mb-5">
+        <div class="container py-5">
+            <h1 class="display-4">Welcome to CS50 Shop</h1>
+            <p class="lead">Discover amazing products for your coding journey</p>
+            <a href="/products" class="btn btn-primary btn-lg mt-3">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Featured Products</h2>
+            <a href="/products" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for product in featured_products %}
+            <div class="col">
+                <div class="card product-card h-100">
+                    <div class="product-image-container p-3">
+                        <img src="{{ product.image_url }}" class="product-image" alt="{{ product.name }}">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="price">${{ product.price }}</p>
+                        <p class="card-text">{{ product.description | truncate(100) }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-flex justify-content-between">
+                            <a href="/product/{{ product.id }}" class="btn btn-outline-secondary">View Details</a>
+                            <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                <i class="bi bi-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="mb-5">
+        <h2 class="mb-4">Shop By Category</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for category in categories %}
+            <div class="col">
+                <a href="/products?category={{ category.id }}" class="text-decoration-none">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">{{ category.name }}</h3>
+                            <p class="card-text">{{ category.description }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Promotion Section -->
+    <section class="bg-primary text-white p-4 rounded-3 mb-5">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>Special Offer for CS50 Students!</h2>
+                <p class="lead">Use code CS50SPECIAL for 10% off your first order</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="/products" class="btn btn-light btn-lg">Shop Now</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="../static/js/cart.js"></script>
+{% endblock %}

@@ -1,0 +1,339 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Shopping Cart - CS50 Shop
+{% endblock %}
+
+{% block main %}
+    <h1 class="mb-4">Shopping Cart</h1>
+    
+    {% if cart_items %}
+    <div class="row">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">Product</h5>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">Price</h5>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">Quantity</h5>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">Subtotal</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for item in cart_items %}
+                    <div class="row align-items-center mb-3 pb-3 border-bottom cart-item" data-item-id="{{ item.product.id }}">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="cart-item-image me-3">
+                                <div>
+                                    <h6><a href="/product/{{ item.product.id }}" class="text-decoration-none">{{ item.product.name }}</a></h6>
+                                    <button class="btn btn-sm btn-link text-danger p-0 remove-item" data-item-id="{{ item.product.id }}">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="price">${{ item.product.price }}</span>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="quantity-control justify-content-center">
+                                <button type="button" class="btn btn-sm btn-outline-secondary decrease-quantity" 
+                                        data-item-id="{{ item.product.id }}">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <input type="number" class="form-control quantity-input" value="{{ item.quantity }}" 
+                                       min="1" max="{{ item.product.stock }}" data-item-id="{{ item.product.id }}">
+                                <button type="button" class="btn btn-sm btn-outline-secondary increase-quantity" 
+                                        data-item-id="{{ item.product.id }}">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="price item-subtotal">${{ (item.product.price * item.quantity) | round(2) }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between">
+                        <a href="/products" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left"></i> Continue Shopping
+                        </a>
+                        <button id="update-cart" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Update Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="subtotal">${{ cart_total | round(2) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span id="shipping">
+                            {% if cart_total >= 50 %}
+                            Free
+                            {% else %}
+                            $5.00
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% if discount %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Discount</span>
+                        <span id="discount">-${{ discount | round(2) }}</span>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold" id="total">
+                            ${{ (cart_total + (0 if cart_total >= 50 else 5) - (discount or 0)) | round(2) }}
+                        </span>
+                    </div>
+                    
+                    <!-- Promo Code -->
+                    <div class="mb-3">
+                        <label for="promo-code" class="form-label">Promo Code</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="promo-code" placeholder="Enter code">
+                            <button class="btn btn-outline-secondary" type="button" id="apply-promo">Apply</button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="/checkout" class="btn btn-primary btn-lg">
+                            Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-cart-x" style="font-size: 5rem;"></i>
+        </div>
+        <h2>Your cart is empty</h2>
+        <p class="lead">Looks like you haven't added any products to your cart yet.</p>
+        <a href="/products" class="btn btn-primary btn-lg mt-3">Start Shopping</a>
+    </div>
+    {% endif %}
+    
+    <!-- Featured Products -->
+    {% if featured_products %}
+    <section class="mt-5">
+        <h3 class="mb-4">You Might Also Like</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for product in featured_products %}
+            <div class="col">
+                <div class="card product-card h-100">
+                    <div class="product-image-container p-3">
+                        <img src="{{ product.image_url }}" class="product-image" alt="{{ product.name }}">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="price">${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-flex justify-content-between">
+                            <a href="/product/{{ product.id }}" class="btn btn-outline-secondary">View Details</a>
+                            <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                <i class="bi bi-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="../static/js/cart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle quantity changes
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        const decreaseButtons = document.querySelectorAll('.decrease-quantity');
+        const increaseButtons = document.querySelectorAll('.increase-quantity');
+        const removeButtons = document.querySelectorAll('.remove-item');
+        const updateCartButton = document.getElementById('update-cart');
+        const applyPromoButton = document.getElementById('apply-promo');
+        
+        // Decrease quantity
+        decreaseButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                    updateItemSubtotal(itemId);
+                } else if (value === 1) {
+                    // If quantity would become 0, remove the item completely
+                    removeFromCart(itemId, function() {
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+        
+        // Increase quantity
+        increaseButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+                let value = parseInt(input.value);
+                let max = parseInt(input.max);
+                if (value < max) {
+                    input.value = value + 1;
+                    updateItemSubtotal(itemId);
+                }
+            });
+        });
+        
+        // Manual quantity input
+        quantityInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const itemId = this.dataset.itemId;
+                updateItemSubtotal(itemId);
+            });
+        });
+        
+        // Remove item
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                const productId = this.closest('.cart-item').querySelector('.quantity-input').dataset.itemId;
+                removeFromCart(productId);
+            });
+        });
+        
+        // Update cart
+        updateCartButton.addEventListener('click', function() {
+            updateCart();
+        });
+        
+        // Apply promo code
+        applyPromoButton.addEventListener('click', function() {
+            const promoCode = document.getElementById('promo-code').value.trim();
+            if (promoCode) {
+                applyPromoCode(promoCode);
+            }
+        });
+        
+        // Update item subtotal based on quantity
+        function updateItemSubtotal(itemId) {
+            const item = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+            const priceElement = item.querySelector('.price:not(.item-subtotal)');
+            const quantityInput = item.querySelector('.quantity-input');
+            const subtotalElement = item.querySelector('.item-subtotal');
+            
+            const price = parseFloat(priceElement.textContent.replace('$', ''));
+            const quantity = parseInt(quantityInput.value);
+            const subtotal = price * quantity;
+            
+            subtotalElement.textContent = '$' + subtotal.toFixed(2);
+        }
+        
+        // AJAX functions for cart operations
+        function updateCart() {
+            const updates = [];
+            quantityInputs.forEach(input => {
+                updates.push({
+                    id: input.dataset.itemId,
+                    quantity: parseInt(input.value)
+                });
+            });
+            
+            // AJAX request to update cart
+            fetch('/cart/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ updates: updates })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to update cart: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the cart.');
+            });
+        }
+        
+        function removeFromCart(itemId) {
+            // AJAX request to remove item from cart
+            fetch(`/cart/remove/${itemId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to remove item: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while removing the item.');
+            });
+        }
+        
+        function applyPromoCode(code) {
+            // AJAX request to apply promo code
+            fetch('/cart/promo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to apply promo code: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while applying the promo code.');
+            });
+        }
+    });
+</script>
+{% endblock %}

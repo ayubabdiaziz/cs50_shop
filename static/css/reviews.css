@@ -1,0 +1,88 @@
+/* Review System Styles */
+
+.stars-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.stars-container i {
+    font-size: 1.25rem;
+    margin-right: 2px;
+}
+
+.rating-input .stars-container i {
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+.rating-input .stars-container i:hover {
+    transform: scale(1.1);
+}
+
+/* Product Review Card */
+.review-card {
+    transition: transform 0.2s;
+}
+
+.review-card:hover {
+    transform: translateY(-3px);
+}
+
+/* Order Status Badges */
+.status-badge {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.65rem;
+}
+
+/* Order Timeline */
+.order-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.order-timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #0d6efd;
+    z-index: 1;
+}
+
+/* Order Detail Page */
+.order-item-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Checkout Item */
+.checkout-item-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}

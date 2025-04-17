@@ -1,0 +1,339 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ product.name }} - CS50 Shop
+{% endblock %}
+
+{% block main %}
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/products">Products</a></li>
+            <li class="breadcrumb-item"><a href="/products?category={{ product.category_id }}">{{ product.category_name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-details-image img-fluid">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-md-6">
+            <h1 class="mb-3">{{ product.name }}</h1>
+            
+            <div class="mb-3">
+                <span class="badge bg-primary">{{ product.category_name }}</span>
+                {% if product.stock > 0 %}
+                    <span class="badge bg-success">In Stock</span>
+                {% else %}
+                    <span class="badge bg-danger">Out of Stock</span>
+                {% endif %}
+            </div>
+            
+            <h2 class="price mb-4">${{ product.price }}</h2>
+            
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ product.description }}</p>
+            </div>
+            
+            <form id="add-to-cart-form" class="mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="quantity" class="col-form-label">Quantity:</label>
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group quantity-control">
+                            <button type="button" class="btn btn-outline-secondary decrease-quantity">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="number" id="quantity" name="quantity" class="form-control quantity-input" 
+                                   value="1" min="1" max="{{ product.stock }}">
+                            <button type="button" class="btn btn-outline-secondary increase-quantity">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg {% if product.stock == 0 %}disabled{% endif %}" 
+                            data-product-id="{{ product.id }}">
+                        <i class="bi bi-cart-plus"></i> Add to Cart
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-lg buy-now" 
+                            data-product-id="{{ product.id }}" {% if product.stock == 0 %}disabled{% endif %}>
+                        Buy Now
+                    </button>
+                </div>
+            </form>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-truck"></i> Free shipping on orders over $50
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    <section class="mt-5">
+        <h3 class="mb-4">You May Also Like</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for related_product in related_products %}
+            <div class="col">
+                <div class="card product-card h-100">
+                    <div class="product-image-container p-3">
+                        <img src="{{ related_product.image_url }}" class="product-image" alt="{{ related_product.name }}">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ related_product.name }}</h5>
+                        <p class="price">${{ related_product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-flex justify-content-between">
+                            <a href="/product/{{ related_product.id }}" class="btn btn-outline-secondary">View Details</a>
+                            <button class="btn btn-primary add-to-cart" data-product-id="{{ related_product.id }}">
+                                <i class="bi bi-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Product Reviews -->
+    <section class="mt-5" id="reviews-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Customer Reviews</h3>
+            <div class="d-flex align-items-center">
+                <div class="me-2">
+                    <span id="avg-rating" class="fs-4 fw-bold">0.0</span>
+                    <span class="text-muted">/ 5</span>
+                </div>
+                <div id="avg-rating-stars" class="stars-container">
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                    <i class="bi bi-star"></i>
+                </div>
+                <span id="review-count" class="ms-2 text-muted">(0 reviews)</span>
+            </div>
+        </div>
+        
+        <!-- Review Form -->
+        {% if session.user_id %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Write a Review</h5>
+                <form action="/product/{{ product.id }}/review" method="post" id="review-form">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <div class="rating-input">
+                            <input type="hidden" name="rating" id="rating-value" value="5">
+                            <div class="stars-container">
+                                <i class="bi bi-star-fill rating-star" data-value="1"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="2"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="3"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="4"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Your Review</label>
+                        <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Share your experience with this product"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle me-2"></i> Please <a href="/login">log in</a> to leave a review.
+        </div>
+        {% endif %}
+        
+        <!-- Reviews List -->
+        <div id="reviews-container">
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading reviews...</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/cart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('quantity');
+        const decreaseBtn = document.querySelector('.decrease-quantity');
+        const increaseBtn = document.querySelector('.increase-quantity');
+        const addToCartForm = document.getElementById('add-to-cart-form');
+        const buyNowBtn = document.querySelector('.buy-now');
+        
+        // Quantity controls
+        decreaseBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            let max = parseInt(quantityInput.max);
+            if (value < max) {
+                quantityInput.value = value + 1;
+            }
+        });
+        
+        // Add to cart form submission
+        addToCartForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Get product ID from the submit button within the form to ensure we get the correct one
+            const productId = this.querySelector('button[data-product-id]').dataset.productId;
+            const quantity = quantityInput.value;
+            
+            // Call the addToCart function from cart.js
+            addToCart(productId, quantity);
+        });
+        
+        // Buy now button
+        buyNowBtn.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const quantity = quantityInput.value;
+            
+            // Add to cart and redirect to checkout
+            addToCart(productId, quantity, function() {
+                window.location.href = '/checkout';
+            });
+        });
+        
+        // Reviews functionality
+        const productId = {{ product.id }};
+        const reviewsContainer = document.getElementById('reviews-container');
+        const avgRatingElement = document.getElementById('avg-rating');
+        const avgRatingStars = document.getElementById('avg-rating-stars');
+        const reviewCountElement = document.getElementById('review-count');
+        
+        // Rating input functionality
+        const ratingStars = document.querySelectorAll('.rating-star');
+        const ratingValue = document.getElementById('rating-value');
+        
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.dataset.value;
+                ratingValue.value = value;
+                
+                // Update stars display
+                ratingStars.forEach(s => {
+                    if (s.dataset.value <= value) {
+                        s.classList.add('text-warning');
+                    } else {
+                        s.classList.remove('text-warning');
+                    }
+                });
+            });
+            
+            // Initialize with 5 stars selected
+            if (star.dataset.value <= 5) {
+                star.classList.add('text-warning');
+            }
+        });
+        
+        // Fetch reviews from API
+        fetch(`/api/reviews/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update average rating
+                avgRatingElement.textContent = data.average_rating;
+                reviewCountElement.textContent = `(${data.count} reviews)`;
+                
+                // Update average rating stars
+                const avgRatingStarsElements = avgRatingStars.querySelectorAll('i');
+                avgRatingStarsElements.forEach((star, index) => {
+                    if (index < Math.floor(data.average_rating)) {
+                        star.classList.remove('bi-star');
+                        star.classList.add('bi-star-fill', 'text-warning');
+                    } else if (index < data.average_rating) {
+                        star.classList.remove('bi-star');
+                        star.classList.add('bi-star-half', 'text-warning');
+                    }
+                });
+                
+                // Clear loading indicator
+                reviewsContainer.innerHTML = '';
+                
+                if (data.reviews.length === 0) {
+                    reviewsContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i> No reviews yet. Be the first to review this product!
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display reviews
+                data.reviews.forEach(review => {
+                    const reviewDate = new Date(review.created_at);
+                    const formattedDate = reviewDate.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                    
+                    // Generate stars HTML
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        if (i <= review.rating) {
+                            starsHtml += '<i class="bi bi-star-fill text-warning"></i>';
+                        } else {
+                            starsHtml += '<i class="bi bi-star"></i>';
+                        }
+                    }
+                    
+                    const reviewHtml = `
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <h6 class="mb-0">${review.username}</h6>
+                                        <div class="stars-container">
+                                            ${starsHtml}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">${formattedDate}</small>
+                                </div>
+                                <p class="mb-0">${review.comment || 'No comment provided.'}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    reviewsContainer.innerHTML += reviewHtml;
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching reviews:', error);
+                reviewsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Error loading reviews. Please try again later.
+                    </div>
+                `;
+            });
+    }); // Close DOMContentLoaded event listener
+</script>
+{% endblock %}

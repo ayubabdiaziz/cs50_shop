@@ -1,0 +1,201 @@
+/* Main Styling for CS50 Shop */
+
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main {
+    flex: 1;
+}
+
+/* Product Cards */
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-container {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.price {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Cart Badge */
+.cart-count {
+    position: relative;
+    top: -8px;
+}
+
+/* Hero Section */
+.hero {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+    margin-bottom: 30px;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* Flash Messages */
+.alert-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 300px;
+}
+
+/* Product Details */
+.product-details-image {
+    max-height: 400px;
+    object-fit: contain;
+}
+
+/* Cart Page */
+.cart-item-image {
+    max-width: 100px;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-control button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-input {
+    width: 50px;
+    text-align: center;
+}
+
+/* Checkout Steps */
+.checkout-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.checkout-step {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    position: relative;
+}
+
+.checkout-step.active {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.checkout-step:not(:last-child):after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: -1;
+}
+
+/* Admin Styles */
+.admin-product-image {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.admin-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.admin-table img {
+    transition: transform 0.2s;
+}
+
+.admin-table img:hover {
+    transform: scale(1.5);
+}
+
+.admin-modal .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #0d6efd;
+}
+
+.admin-modal .form-label {
+    font-weight: 500;
+}
+
+.admin-modal .preview-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero {
+        padding: 30px 0;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .checkout-steps {
+        flex-direction: column;
+    }
+    
+    .checkout-step:not(:last-child):after {
+        display: none;
+    }
+    
+    .admin-product-image {
+        width: 40px;
+        height: 40px;
+    }
+}

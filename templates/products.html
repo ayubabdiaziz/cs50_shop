@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Products - CS50 Shop
+{% endblock %}
+
+{% block main %}
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/products" method="get" id="filter-form">
+                        <!-- Category Filter -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Categories</label>
+                            {% for category in categories %}
+                            <div class="form-check">
+                                <input class="form-check-input filter-item" type="checkbox" name="category" 
+                                       value="{{ category.id }}" id="category-{{ category.id }}"
+                                       {% if category.id|string in request.args.getlist('category') %}checked{% endif %}>
+                                <label class="form-check-label" for="category-{{ category.id }}">
+                                    {{ category.name }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Price Range Filter -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Price Range</label>
+                            <div class="d-flex align-items-center">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control filter-item" name="min_price" 
+                                           value="{{ request.args.get('min_price', '') }}" placeholder="Min">
+                                </div>
+                                <span class="mx-2">-</span>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control filter-item" name="max_price" 
+                                           value="{{ request.args.get('max_price', '') }}" placeholder="Max">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sort By -->
+                        <div class="mb-3">
+                            <label for="sort" class="form-label fw-bold">Sort By</label>
+                            <select class="form-select filter-item" id="sort" name="sort">
+                                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                                <option value="name_asc" {% if request.args.get('sort') == 'name_asc' %}selected{% endif %}>Name: A to Z</option>
+                                <option value="name_desc" {% if request.args.get('sort') == 'name_desc' %}selected{% endif %}>Name: Z to A</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a href="/products" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Listings -->
+        <div class="col-lg-9">
+            <!-- Search Results Info -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    {% if search_query %}
+                    Search Results for "{{ search_query }}"
+                    {% else %}
+                    All Products
+                    {% endif %}
+                </h2>
+                <p>Showing {{ products|length }} of {{ total_products }} products</p>
+            </div>
+            
+            {% if products %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card product-card h-100">
+                        <div class="product-image-container p-3">
+                            <img src="{{ product.image_url }}" class="product-image" alt="{{ product.name }}">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="price">${{ product.price }}</p>
+                            <p class="card-text">{{ product.description | truncate(100) }}</p>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <div class="d-flex justify-content-between">
+                                <a href="/product/{{ product.id }}" class="btn btn-outline-secondary">View Details</a>
+                                <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                    <i class="bi bi-cart-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if pages > 1 %}
+            <nav aria-label="Product pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ pagination_url(page - 1) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    {% for p in range(1, pages + 1) %}
+                    <li class="page-item {% if p == page %}active{% endif %}">
+                        <a class="page-link" href="{{ pagination_url(p) }}">{{ p }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    <li class="page-item {% if page == pages %}disabled{% endif %}">
+                        <a class="page-link" href="{{ pagination_url(page + 1) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <div class="alert alert-info">
+                No products found matching your criteria. Try adjusting your filters.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="../static/js/cart.js"></script>
+<script>
+    // Auto-submit form when filters change
+    document.querySelectorAll('.filter-item').forEach(item => {
+        item.addEventListener('change', function() {
+            document.getElementById('filter-form').submit();
+        });
+    });
+</script>
+{% endblock %}

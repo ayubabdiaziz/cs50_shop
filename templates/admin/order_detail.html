@@ -1,0 +1,221 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Order #{{ order.id }} - CS50 Shop
+{% endblock %}
+
+{% block main %}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">Order #{{ order.id }}</h1>
+            <div>
+                <a href="/admin/orders" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Orders
+                </a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                    <i class="bi bi-pencil me-1"></i> Update Status
+                </button>
+            </div>
+        </div>
+        
+        <!-- Order Status -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="card-title">Order Status</h5>
+                        <div class="d-flex align-items-center">
+                            {% if order.status == 'pending' %}
+                            <span class="badge bg-warning text-dark fs-6 me-2">Pending</span>
+                            {% elif order.status == 'processing' %}
+                            <span class="badge bg-info fs-6 me-2">Processing</span>
+                            {% elif order.status == 'shipped' %}
+                            <span class="badge bg-primary fs-6 me-2">Shipped</span>
+                            {% elif order.status == 'delivered' %}
+                            <span class="badge bg-success fs-6 me-2">Delivered</span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-danger fs-6 me-2">Cancelled</span>
+                            {% endif %}
+                            <span class="text-muted">Last Updated: {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <h5 class="card-title">Order Date</h5>
+                        <p class="mb-0">{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Customer Information -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Customer Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Contact Details</h6>
+                        <p class="mb-1"><strong>Name:</strong> {{ order.name }}</p>
+                        <p class="mb-1"><strong>Email:</strong> {{ order.email }}</p>
+                        <p class="mb-3"><strong>User ID:</strong> {{ order.user_id }}</p>
+                        
+                        <h6>Shipping Address</h6>
+                        <p class="mb-1">{{ order.address }}</p>
+                        <p class="mb-1">{{ order.city }}, {{ order.state }} {{ order.zip }}</p>
+                        
+                        <h6 class="mt-3">Payment Information</h6>
+                        <p class="mb-1"><strong>Method:</strong> {{ order.payment_method }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Order Items</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order_items %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ item.image_url }}" alt="{{ item.product_name }}" class="me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                <div>
+                                                    <h6 class="mb-0">{{ item.product_name }}</h6>
+                                                    <small class="text-muted">Product ID: {{ item.product_id }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>${{ item.price | round(2) }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td class="text-end">${{ (item.price * item.quantity) | round(2) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                        <td class="text-end">${{ order.total | round(2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                        <td class="text-end">
+                                            {% if order.total >= 50 %}
+                                            Free
+                                            {% else %}
+                                            $5.00
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                        <td class="text-end"><strong>${{ order.total | round(2) }}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Notes & History -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Order History</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if order_history %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Notes</th>
+                                        <th>Updated By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for history in order_history %}
+                                    <tr>
+                                        <td>{{ history.created_at.strftime('%m/%d/%Y %I:%M %p') }}</td>
+                                        <td>
+                                            {% if history.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            {% elif history.status == 'processing' %}
+                                            <span class="badge bg-info">Processing</span>
+                                            {% elif history.status == 'shipped' %}
+                                            <span class="badge bg-primary">Shipped</span>
+                                            {% elif history.status == 'delivered' %}
+                                            <span class="badge bg-success">Delivered</span>
+                                            {% elif history.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Cancelled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ history.notes or 'No notes' }}</td>
+                                        <td>{{ history.admin_username }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i> No status updates have been recorded for this order.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStatusModalLabel">Update Order #{{ order.id }} Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/admin/orders/update_status" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Order Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                                <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any notes about this status change"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
